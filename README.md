@@ -1,8 +1,9 @@
-Deploy Link 
-frontened :http://localhost:3000
-
-backened :http://localhost:8080
-
+Frontend:
+https://temporary-prompt-tungsten-fsv7ic4.vercel.app
+Backend API:
+https://temporary-prompt-tungsten-fsv7ic4.vercel.app/api
+Test endpoint:
+https://temporary-prompt-tungsten-fsv7ic4.vercel.app/api/centres
 
 
 # Farmer Procurement Scheduling and Queue Management System
