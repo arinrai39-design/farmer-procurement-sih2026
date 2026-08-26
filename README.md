@@ -1,6 +1,7 @@
 Vercel deployment link : https://frontend-peach-sigma-ppreby0q9s.vercel.app
 
 Local frontend: http://localhost:3000
+
 Local Spring Boot backend: http://localhost:8080
 
 
