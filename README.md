@@ -1,3 +1,9 @@
+Deploy Link 
+frontened :http://localhost:3000
+backened :http://localhost:8080
+
+
+
 # Farmer Procurement Scheduling and Queue Management System
 
 College-level SIH 2026 prototype for PS ID `SIH26032`.
