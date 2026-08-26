@@ -1,15 +1,7 @@
-# Deploy
+Vercel deployment link : https://frontend-peach-sigma-ppreby0q9s.vercel.app
 
-For Vercel, import this GitHub repo and set the project root directory to `frontend`.
-The frontend includes demo API routes under `/api`, so the deployed app works from one Vercel URL.
-
-After deploy:
-
-- Frontend: `https://your-vercel-project.vercel.app`
-- Backend API: `https://your-vercel-project.vercel.app/api`
-
-Local frontend: `http://localhost:3000`
-Local Spring Boot backend: `http://localhost:8080`
+Local frontend: http://localhost:3000
+Local Spring Boot backend: http://localhost:8080
 
 
 # Farmer Procurement Scheduling and Queue Management System
