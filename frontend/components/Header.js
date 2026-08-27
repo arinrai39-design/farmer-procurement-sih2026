@@ -10,7 +10,7 @@ export default function Header({ view, setView, session, onLogout }) {
       <nav>
         <button className={view === "landing" ? "active" : ""} onClick={() => setView("landing")} title="Home"><Home size={18} />Home</button>
         <button onClick={() => setView("booking")} title="Book slot"><ClipboardList size={18} />Book Slot</button>
-        <button onClick={() => setView(session?.role === "ADMIN" ? "admin" : "farmer")} title="Dashboard"><BarChart3 size={18} />Dashboard</button>
+        <button onClick={() => setView(["ADMIN", "OFFICER"].includes(session?.role) ? "admin" : "farmer")} title="Dashboard"><BarChart3 size={18} />Dashboard</button>
       </nav>
       <div className="userbar">
         {session ? (

@@ -167,6 +167,8 @@ input, select {
 .slot { min-height: 116px; border: 1px solid var(--line); background: #f8faf7; border-radius: 8px; padding: 14px; text-align: left; display: grid; gap: 8px; }
 .slot.selected { border-color: var(--green); background: #eaf4ee; }
 .slot:disabled { opacity: .55; cursor: not-allowed; }
+.slot small { color: var(--muted); font-weight: 750; }
+.slot em { color: var(--green); font-style: normal; font-weight: 900; }
 .confirmation { margin: 16px 0; padding: 22px; display: grid; gap: 8px; }
 .confirmation strong { font-size: 34px; color: var(--green); }
 .tableScroll { overflow-x: auto; }
@@ -176,6 +178,9 @@ th { color: var(--muted); font-size: 13px; }
 td small { display: block; color: var(--muted); margin-top: 4px; }
 .rowActions { display: flex; gap: 6px; flex-wrap: wrap; }
 .rowActions button { border: 1px solid var(--line); background: white; border-radius: 8px; padding: 7px 9px; font-weight: 750; }
+.auditList { display: grid; gap: 10px; }
+.auditList p { margin: 0; display: grid; grid-template-columns: 1fr 140px 220px; gap: 12px; padding: 12px; border: 1px solid var(--line); border-radius: 8px; background: #f8faf7; }
+.auditList span, .auditList small { color: var(--muted); }
 .emptyState { padding: 90px 18px; text-align: center; color: var(--muted); font-size: 20px; }
 .footer { display: flex; gap: 12px; justify-content: center; align-items: center; flex-wrap: wrap; padding: 28px; border-top: 1px solid var(--line); color: var(--muted); }
 
@@ -191,6 +196,7 @@ td small { display: block; color: var(--muted); margin-top: 4px; }
   .miniQueue { grid-template-columns: repeat(2, 1fr); }
   .centres, .titleRow { align-items: flex-start; flex-direction: column; }
   .infoGrid { grid-template-columns: 1fr; gap: 4px; }
+  .auditList p { grid-template-columns: 1fr; }
   nav button { font-size: 0; }
   nav button svg { margin: 0; }
 }

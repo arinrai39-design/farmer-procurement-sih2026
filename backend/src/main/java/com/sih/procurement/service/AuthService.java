@@ -4,6 +4,7 @@ import com.sih.procurement.dto.AuthDtos.*;
 import com.sih.procurement.entity.*;
 import com.sih.procurement.exception.ApiException;
 import com.sih.procurement.repository.*;
+import com.sih.procurement.security.JwtService;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
@@ -12,11 +13,13 @@ public class AuthService {
   private final UserRepository users;
   private final FarmerRepository farmers;
   private final PasswordEncoder encoder;
+  private final JwtService jwtService;
 
-  public AuthService(UserRepository users, FarmerRepository farmers, PasswordEncoder encoder) {
+  public AuthService(UserRepository users, FarmerRepository farmers, PasswordEncoder encoder, JwtService jwtService) {
     this.users = users;
     this.farmers = farmers;
     this.encoder = encoder;
+    this.jwtService = jwtService;
   }
 
   public AuthResponse register(RegisterRequest req) {
@@ -39,7 +42,7 @@ public class AuthService {
     farmer.district = req.district();
     farmer.state = req.state();
     farmers.save(farmer);
-    return new AuthResponse(user.id, farmer.id, user.displayName, user.role, "demo-token-" + user.id);
+    return new AuthResponse(user.id, farmer.id, user.displayName, user.role, jwtService.issue(user.id, farmer.id, user.username, user.role));
   }
 
   public AuthResponse login(LoginRequest req) {
@@ -50,6 +53,6 @@ public class AuthService {
       throw new ApiException("Invalid login details.");
     }
     Long farmerId = user.role == Role.FARMER ? farmers.findByUserId(user.id).map(f -> f.id).orElse(null) : null;
-    return new AuthResponse(user.id, farmerId, user.displayName, user.role, "demo-token-" + user.id);
+    return new AuthResponse(user.id, farmerId, user.displayName, user.role, jwtService.issue(user.id, farmerId, user.username, user.role));
   }
 }

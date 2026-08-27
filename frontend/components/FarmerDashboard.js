@@ -15,7 +15,7 @@ export default function FarmerDashboard({ session }) {
     if (!session?.farmerId) return;
     try {
       const [bookings, notifications] = await Promise.all([
-        api.farmerBookings(session.farmerId),
+        api.myBookings(),
         api.notifications(session.userId)
       ]);
       setBooking(bookings[0]);
@@ -40,7 +40,7 @@ export default function FarmerDashboard({ session }) {
       <section className="kpiGrid">
         <div className="metric"><Route /><span>Token</span><strong>{booking.tokenNumber}</strong></div>
         <div className="metric"><Clock3 /><span>Queue Position</span><strong>{booking.queuePosition}</strong><small>{booking.peopleAhead} farmers ahead</small></div>
-        <div className="metric"><BellRing /><span>Estimated Wait</span><strong>{booking.estimatedWait}</strong></div>
+        <div className="metric"><BellRing /><span>Estimated Wait</span><strong>{booking.estimatedWait}</strong><small>{booking.congestion} · {booking.confidence} confidence</small></div>
         <div className="metric"><IndianRupee /><span>Payment</span><strong><StatusBadge value={booking.paymentStatus} /></strong></div>
       </section>
       <section className="split">
@@ -53,6 +53,7 @@ export default function FarmerDashboard({ session }) {
             <span>Quantity</span><b>{booking.quantityKg} kg</b>
             <span>Slot</span><b>{booking.date} · {booking.slot}</b>
             <span>Amount</span><b>Rs {booking.amount || 0}</b>
+            <span>Service Avg</span><b>{Number(booking.averageServiceMinutes || 0).toFixed(1)} min · {booking.activeCounters} counters</b>
           </div>
         </article>
         <article className="panel">

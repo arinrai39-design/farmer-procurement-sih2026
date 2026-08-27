@@ -20,7 +20,7 @@ export default function Home() {
 
   function handleAuth(nextSession) {
     setSessionState(nextSession);
-    setView(nextSession.role === "ADMIN" ? "admin" : "farmer");
+    setView(["ADMIN", "OFFICER"].includes(nextSession.role) ? "admin" : "farmer");
   }
 
   function logout() {

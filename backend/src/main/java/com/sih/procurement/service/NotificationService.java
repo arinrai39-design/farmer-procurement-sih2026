@@ -16,8 +16,13 @@ public class NotificationService {
   }
 
   public void send(User user, String message) {
+    send(user, "GENERAL", message);
+  }
+
+  public void send(User user, String type, String message) {
     Notification n = new Notification();
     n.user = user;
+    n.type = type;
     n.message = message;
     n.createdAt = LocalDateTime.now();
     notifications.save(n);

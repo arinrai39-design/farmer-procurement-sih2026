@@ -3,6 +3,7 @@ package com.sih.procurement.config;
 import com.sih.procurement.entity.*;
 import com.sih.procurement.repository.*;
 import org.springframework.boot.CommandLineRunner;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.crypto.password.PasswordEncoder;
@@ -10,15 +11,23 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.time.ZoneId;
 import java.util.List;
 
 @Configuration
 public class DataSeeder {
+  @Value("${app.business-timezone}")
+  private String businessTimezone;
+
+  @Value("${app.demo.seed}")
+  private boolean demoSeed;
+
   @Bean
   CommandLineRunner seed(UserRepository users, FarmerRepository farmers, CentreRepository centres,
       CropRepository crops, SlotRepository slots, BookingRepository bookings,
-      NotificationRepository notifications, PasswordEncoder encoder) {
+      NotificationRepository notifications, CounterRepository counters, BookingTokenSequenceRepository tokenSequences, PasswordEncoder encoder) {
     return args -> {
+      if (!demoSeed) return;
       if (users.count() > 0) return;
 
       User admin = new User();
@@ -37,12 +46,14 @@ public class DataSeeder {
       List<Crop> cropList = List.of(crop("Wheat", "21.00"), crop("Rice", "23.50"), crop("Paddy", "22.00"), crop("Maize", "19.25"));
       crops.saveAll(cropList);
 
-      LocalDate demoDate = LocalDate.of(2026, 8, 27);
+      LocalDate demoDate = LocalDate.now(ZoneId.of(businessTimezone));
       for (ProcurementCentre c : centreList) {
         slots.save(slot(c, demoDate, "09:00 AM - 10:00 AM", 10));
         slots.save(slot(c, demoDate, "10:00 AM - 11:00 AM", 10));
         slots.save(slot(c, demoDate, "11:00 AM - 12:00 PM", 10));
         slots.save(slot(c, demoDate, "12:00 PM - 01:00 PM", 10));
+        counters.save(counter(c, "Counter 1", admin));
+        counters.save(counter(c, "Counter 2", admin));
       }
 
       String[][] names = {
@@ -60,7 +71,6 @@ public class DataSeeder {
           {"Anita Shukla","9876501012","FARM1012","Jajmau","Kanpur"}};
 
       List<Slot> allSlots = slots.findAll();
-      int token = 101;
       for (int i = 0; i < names.length; i++) {
         User u = new User();
         u.username = names[i][1];
@@ -84,12 +94,26 @@ public class DataSeeder {
         b.centre = centreList.get(i % centreList.size());
         b.crop = cropList.get(i % cropList.size());
         b.slot = allSlots.get(i % allSlots.size());
+        b.businessDate = demoDate;
         b.quantityKg = 1200 + (i * 175);
-        b.tokenNumber = "A" + token++;
+        b.tokenSequence = 101 + i;
+        b.tokenNumber = centreList.get(i % centreList.size()).location.substring(0, 3).toUpperCase() + "-" + b.tokenSequence;
         b.status = i < 2 ? BookingStatus.COMPLETED : i == 2 ? BookingStatus.PROCUREMENT : i == 3 ? BookingStatus.VERIFICATION : BookingStatus.WAITING;
         b.paymentStatus = i < 1 ? PaymentStatus.PAID : i < 4 ? PaymentStatus.PROCESSING : PaymentStatus.PENDING;
-        b.procurementAmount = b.status == BookingStatus.COMPLETED ? b.crop.ratePerKg.multiply(BigDecimal.valueOf(b.quantityKg)) : null;
+        b.ratePerKg = b.crop.ratePerKg;
+        b.weighedQuantityKg = b.status == BookingStatus.COMPLETED ? b.quantityKg - 20 : 0;
+        b.acceptedQuantityKg = b.status == BookingStatus.COMPLETED ? b.quantityKg - 20 : 0;
+        b.procurementAmount = b.status == BookingStatus.COMPLETED ? b.crop.ratePerKg.multiply(BigDecimal.valueOf(b.acceptedQuantityKg)) : null;
         b.createdAt = LocalDateTime.now().minusMinutes(70L - i * 4L);
+        b.updatedAt = b.createdAt;
+        if (b.status == BookingStatus.COMPLETED) {
+          b.calledAt = b.createdAt.plusMinutes(12);
+          b.arrivedAt = b.calledAt.plusMinutes(3);
+          b.verificationStartedAt = b.arrivedAt.plusMinutes(3);
+          b.procurementStartedAt = b.verificationStartedAt.plusMinutes(4);
+          b.completedAt = b.procurementStartedAt.plusMinutes(8 + (i % 3));
+          if (b.paymentStatus == PaymentStatus.PAID) b.paymentUpdatedAt = b.completedAt.plusMinutes(20);
+        }
         bookings.save(b);
 
         Notification n = new Notification();
@@ -97,6 +121,17 @@ public class DataSeeder {
         n.message = "Your token is " + b.tokenNumber + ". Track queue status from your dashboard.";
         n.createdAt = LocalDateTime.now().minusMinutes(20);
         notifications.save(n);
+      }
+
+      for (ProcurementCentre centre : centreList) {
+        BookingTokenSequence sequence = new BookingTokenSequence();
+        sequence.centre = centre;
+        sequence.businessDate = demoDate;
+        sequence.nextValue = bookings.findByCentreIdAndBusinessDateOrderByCreatedAtAsc(centre.id, demoDate).stream()
+            .mapToInt(b -> b.tokenSequence)
+            .max()
+            .orElse(100) + 1;
+        tokenSequences.save(sequence);
       }
     };
   }
@@ -115,7 +150,16 @@ public class DataSeeder {
 
   private Slot slot(ProcurementCentre centre, LocalDate date, String time, int capacity) {
     Slot s = new Slot();
-    s.centre = centre; s.slotDate = date; s.timeRange = time; s.capacity = capacity;
+    s.centre = centre; s.slotDate = date; s.timeRange = time; s.capacity = capacity; s.openFlag = true;
     return s;
+  }
+
+  private Counter counter(ProcurementCentre centre, String name, User officer) {
+    Counter counter = new Counter();
+    counter.centre = centre;
+    counter.name = name;
+    counter.officer = officer;
+    counter.activeFlag = true;
+    return counter;
   }
 }

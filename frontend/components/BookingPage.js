@@ -2,13 +2,20 @@ import { useEffect, useState } from "react";
 import { CalendarCheck } from "lucide-react";
 import { api } from "../services/api";
 
+const today = () => {
+  const now = new Date();
+  const month = String(now.getMonth() + 1).padStart(2, "0");
+  const day = String(now.getDate()).padStart(2, "0");
+  return `${now.getFullYear()}-${month}-${day}`;
+};
+
 export default function BookingPage({ session, setView }) {
   const [centres, setCentres] = useState([]);
   const [crops, setCrops] = useState([]);
   const [slots, setSlots] = useState([]);
   const [error, setError] = useState("");
   const [confirmation, setConfirmation] = useState(null);
-  const [form, setForm] = useState({ centreId: 1, cropId: 1, quantityKg: 2500, date: "2026-08-27", slotId: "" });
+  const [form, setForm] = useState({ centreId: 1, cropId: 1, quantityKg: 2500, date: today(), slotId: "" });
 
   const update = (key, value) => setForm((f) => ({ ...f, [key]: value }));
 
@@ -58,6 +65,8 @@ export default function BookingPage({ session, setView }) {
               <CalendarCheck size={18} />
               <b>{slot.timeRange}</b>
               <span>{slot.full ? "FULL" : `${slot.available} / ${slot.capacity} slots available`}</span>
+              <small>{slot.congestion} · {slot.estimatedWaitMinutes} min ETA</small>
+              {slot.recommended && <em>Recommended</em>}
             </button>
           ))}
         </div>
